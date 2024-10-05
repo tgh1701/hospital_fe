@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
+import 'package:hospital_fe/controller/department.dart';
 import 'package:hospital_fe/controller/doctor.dart';
 import 'package:intl/intl.dart';
 
@@ -15,6 +16,15 @@ class _CreateDoctorDialogState extends State<CreateDoctorDialog> {
   final _formKey = GlobalKey<FormState>();
 
   final DoctorController doctorController = Get.put(DoctorController());
+  final DepartmentController departmentController = Get.put(DepartmentController());
+
+  String? selectedDepartment; // Lưu trữ departmentId được chọn
+
+  @override
+  void initState() {
+    super.initState();
+    departmentController.getDepartment(); // Lấy danh sách phòng ban
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,15 +71,37 @@ class _CreateDoctorDialogState extends State<CreateDoctorDialog> {
               ),
               _buildInputField(
                   doctorController.doctorNameController, 'Tên Bác Sĩ'),
-              _buildDateInputField(doctorController.dateOfBirthController, 'Ngày Sinh (YYYY-MM-DD)'),
+              _buildDateInputField(doctorController.dateOfBirthController, 'Ngày Sinh'),
               _buildInputField(doctorController.addressController, 'Địa Chỉ'),
               _buildInputField(doctorController.careerLevelController,
                   'Cấp độ Nghề nghiệp (1, 2, 3...)'),
               _buildInputField(doctorController.seniorityController,
                   'Thâm niên (Số năm)'),
               _buildInputField(doctorController.levelController, 'Trình Độ'),
-              _buildInputField(
-                  doctorController.departmentController, 'Phòng Ban'),
+              const SizedBox(height: 15),
+              Obx(() {
+                return DropdownButtonFormField<String>(
+                  decoration: const InputDecoration(labelText: 'Chọn phòng ban'),
+                  value: selectedDepartment,
+                  items: departmentController.rxListDepartment.map((department) {
+                    return DropdownMenuItem<String>(
+                      value: department.departmentId,
+                      child: Text(department.departmentName ?? "N/A"),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedDepartment = value;
+                    });
+                  },
+                  validator: (value) {
+                    if (value == null) {
+                      return 'Vui lòng chọn phòng ban';
+                    }
+                    return null;
+                  },
+                );
+              }),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -129,9 +161,16 @@ class _CreateDoctorDialogState extends State<CreateDoctorDialog> {
             ),
             ElevatedButton(
               onPressed: () async {
-                await doctorController.postDoctor();
-                Navigator.pop(context);
-                Navigator.pop(context);
+                if (selectedDepartment != null) {
+                  await doctorController.postDoctor(selectedDepartment!);
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                } else {
+                  Get.snackbar("Lỗi", "Vui lòng chọn phòng ban",
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.red,
+                      colorText: Colors.white);
+                }
               },
               child: const Text('Xác nhận'),
             ),
@@ -164,8 +203,7 @@ class _CreateDoctorDialogState extends State<CreateDoctorDialog> {
     );
   }
 
-  Widget _buildDateInputField(
-      TextEditingController controller, String label) {
+  Widget _buildDateInputField(TextEditingController controller, String label) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5.0),
       child: TextFormField(

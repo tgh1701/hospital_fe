@@ -30,7 +30,7 @@ class NurseController extends GetxController {
           final List<dynamic> result = jsonResponse['result'];
           rxListNurse.value =
               result.map((item) => Nurse.fromJson(item)).toList();
-          AppLogger.debug(decodedBody);
+          // AppLogger.debug(decodedBody);
         } else {
           throw Exception('Invalid response format');
         }
@@ -84,7 +84,7 @@ class NurseController extends GetxController {
         nurseIdController.clear();
         identityCardController.clear();
         nurseNameController.clear();
-        dateOfBirthController.clear;
+        dateOfBirthController.clear();
         addressController.clear();
         seniorityController.clear();
         levelController.clear();

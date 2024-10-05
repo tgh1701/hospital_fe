@@ -59,7 +59,7 @@ class _CreatePatientDialogState extends State<CreatePatientDialog> {
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               ),
               _buildInputField(patientController.patientNameController, 'Tên Bệnh Nhân'),
-              _buildDateInputField(patientController.dateOfBirthController, 'Ngày Sinh (YYYY-MM-DD)'),
+              _buildDateInputField(patientController.dateOfBirthController, 'Ngày Sinh'),
               _buildInputField(patientController.addressController, 'Địa Chỉ'),
               _buildInputField(
                 patientController.phoneController,

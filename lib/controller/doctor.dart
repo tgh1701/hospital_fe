@@ -18,7 +18,6 @@ class DoctorController extends GetxController {
   final TextEditingController careerLevelController = TextEditingController();
   final TextEditingController seniorityController = TextEditingController();
   final TextEditingController levelController = TextEditingController();
-  final TextEditingController departmentController = TextEditingController();
 
   Future<RxList<Doctor>> getDoctor() async {
     try {
@@ -62,7 +61,7 @@ class DoctorController extends GetxController {
     }
   }
 
-  Future<RxList<Doctor>> postDoctor() async {
+  Future<RxList<Doctor>> postDoctor(String id) async {
     try {
       final data = Doctor(
         doctorId: doctorIdController.text,
@@ -73,7 +72,7 @@ class DoctorController extends GetxController {
         careerLevel: int.parse(careerLevelController.text),
         seniority: int.parse(seniorityController.text),
         level: levelController.text,
-        departmentId: departmentController.text,
+        departmentId: id,
       );
 
       final response =
@@ -91,7 +90,6 @@ class DoctorController extends GetxController {
         careerLevelController.clear();
         seniorityController.clear();
         levelController.clear();
-        departmentController.clear();
       } else {
         throw Exception('HTTP ${response.statusCode} error: ${response.body}');
       }

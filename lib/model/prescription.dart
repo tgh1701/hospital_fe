@@ -25,7 +25,6 @@ class Prescription {
     this.dateOut,
   });
 
-  // Tạo đối tượng từ JSON
   Prescription.fromJson(Map<String, dynamic> json) {
     prescriptionId = json['PrescriptionID'];
     medicineId = json['MedicineID'];

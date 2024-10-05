@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter/services.dart';
 import 'package:hospital_fe/controller/care.dart';
-import 'package:hospital_fe/controller/disease.dart';
-import 'package:hospital_fe/controller/doctor.dart';
 import 'package:hospital_fe/controller/nurse.dart';
-import 'package:hospital_fe/controller/patient.dart';
 import 'package:hospital_fe/controller/visit.dart';
 import 'package:intl/intl.dart';
 
@@ -24,16 +22,14 @@ class _CreateCareDialogState extends State<CreateCareDialog> {
 
   String? selectedVisit;
   String? selectedNurse;
-  String? selectedDisease;
 
-  final TextEditingController selectedDateController = TextEditingController();
-  final TextEditingController selectedDateOutController =
-      TextEditingController();
+  final TextEditingController careDateController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     nurseController.getNurse();
+    visitController.getVisit();
   }
 
   @override
@@ -41,10 +37,7 @@ class _CreateCareDialogState extends State<CreateCareDialog> {
     return Dialog(
       elevation: 0,
       backgroundColor: Colors.transparent,
-      child: SizedBox(
-        width: 500,
-        child: contentBox(context),
-      ),
+      child: SizedBox(width: 500, child: contentBox(context)),
     );
   }
 
@@ -56,10 +49,7 @@ class _CreateCareDialogState extends State<CreateCareDialog> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black12,
-              offset: Offset(0, 10),
-              blurRadius: 15,
-            ),
+                color: Colors.black12, offset: Offset(0, 10), blurRadius: 15),
           ],
         ),
         child: Form(
@@ -69,7 +59,7 @@ class _CreateCareDialogState extends State<CreateCareDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               const Text(
-                'Tạo chăm sóc',
+                'Thêm chăm sóc',
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -77,7 +67,8 @@ class _CreateCareDialogState extends State<CreateCareDialog> {
                 ),
               ),
               const SizedBox(height: 15),
-              _buildTextField(careController.careIdController, 'Mã chăm sóc'),
+              _buildInputField(
+                  careController.careIdController, 'Mã chăm sóc'),
               Obx(() {
                 return DropdownButtonFormField<String>(
                   decoration: const InputDecoration(labelText: 'Chọn lần khám'),
@@ -97,7 +88,7 @@ class _CreateCareDialogState extends State<CreateCareDialog> {
                   },
                   validator: (value) {
                     if (value == null) {
-                      return 'Vui lòng chọn bệnh nhân';
+                      return 'Vui lòng chọn lần khám';
                     }
                     return null;
                   },
@@ -120,13 +111,13 @@ class _CreateCareDialogState extends State<CreateCareDialog> {
                   },
                   validator: (value) {
                     if (value == null) {
-                      return 'Vui lòng chọn bác sĩ';
+                      return 'Vui lòng chọn y tá';
                     }
                     return null;
                   },
                 );
               }),
-              _buildDateInputField(selectedDateController, 'Ngày chăm sóc'),
+              _buildDateInputField(careDateController, 'Ngày chăm sóc'),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -145,24 +136,11 @@ class _CreateCareDialogState extends State<CreateCareDialog> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 30, vertical: 15),
                     ),
-                    child: const Text('Tạo',
+                    child: const Text('Thêm',
                         style: TextStyle(fontSize: 16, color: Colors.white)),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        if (selectedDateController.text.isNotEmpty) {
-                          careController.postCare(
-                            selectedVisit!,
-                            selectedNurse!,
-                            selectedDateController.text,
-                          );
-                          Navigator.of(context).pop();
-                        } else {
-                          Get.snackbar(
-                              "Lỗi", "Vui lòng chọn ngày vào và ngày ra",
-                              snackPosition: SnackPosition.BOTTOM,
-                              backgroundColor: Colors.red,
-                              colorText: Colors.white);
-                        }
+                        _showConfirmCreate();
                       }
                     },
                   ),
@@ -175,13 +153,45 @@ class _CreateCareDialogState extends State<CreateCareDialog> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label,
-      {TextInputType keyboardType = TextInputType.text}) {
+  void _showConfirmCreate() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Thêm chăm sóc'),
+          content: const Text('Bạn đã chắc chắn chưa?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Hủy'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await careController.postCare(
+                  selectedVisit!,
+                  selectedNurse!,
+                  careDateController.text,
+                );
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+              child: const Text('Xác nhận'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildInputField(TextEditingController controller, String label,
+      {TextInputType keyboardType = TextInputType.text,
+        List<TextInputFormatter>? inputFormatters}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5.0),
       child: TextFormField(
         controller: controller,
         keyboardType: keyboardType,
+        inputFormatters: inputFormatters,
         decoration: InputDecoration(
           labelText: label,
           border: const UnderlineInputBorder(),

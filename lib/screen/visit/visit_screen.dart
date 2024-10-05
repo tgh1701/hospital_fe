@@ -5,6 +5,7 @@ import 'package:hospital_fe/model/visit.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hospital_fe/screen/widget/dialog/create_care_dialog.dart';
+import 'package:hospital_fe/screen/widget/dialog/create_presription_dialog.dart';
 import 'package:hospital_fe/screen/widget/dialog/create_visit_dialog.dart';
 import 'package:hospital_fe/screen/widget/editable_data_cell_widget.dart';
 import 'package:data_table_2/data_table_2.dart';
@@ -177,8 +178,8 @@ class _VisitScreenState extends State<VisitScreen> {
             'Giá:', '${prescription.price?.toStringAsFixed(0) ?? '0'} VNĐ'),
         _buildDataRow('Tổng giá thuốc:',
             '${prescription.totalMedicinePrice?.toStringAsFixed(0) ?? '0'} VNĐ'),
-        _buildDataRow('Tổng chi phí:',
-            '${prescription.totalPrice?.toStringAsFixed(0) ?? '0'} VNĐ'),
+        // _buildDataRow('Tổng chi phí:',
+        //     '${prescription.totalPrice?.toStringAsFixed(0) ?? '0'} VNĐ'),
       ],
     );
   }
@@ -237,6 +238,29 @@ class _VisitScreenState extends State<VisitScreen> {
                       contentPadding: const EdgeInsets.symmetric(vertical: 0),
                     ),
                     style: const TextStyle(fontSize: 16),
+                  ),
+                ),
+                const SizedBox(width: 20),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    fixedSize: const Size(160, 50),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(0),
+                    ),
+                    backgroundColor: Colors.blue,
+                  ),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return const CreatePrescriptionDialog();
+                      },
+                    );
+                  },
+                  child: const Text(
+                    'Thêm đơn thuốc',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
                 ),
                 const SizedBox(width: 20),
@@ -503,47 +527,47 @@ class _VisitScreenState extends State<VisitScreen> {
                                 splashRadius: 20,
                                 hoverColor: Colors.grey[50],
                               ),
-                            IconButton(
-                              icon: Icon(
-                                editingVisitId == filteredVisits[index].visitId
-                                    ? Icons.check
-                                    : Icons.edit,
-                                color: editingVisitId ==
-                                        filteredVisits[index].visitId
-                                    ? Colors.green
-                                    : Colors.blue,
-                                size: 20,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  if (editingVisitId ==
-                                      filteredVisits[index].visitId) {
-                                    final editedVisit = Visit(
-                                      visitId: filteredVisits[index].visitId,
-                                      patientName:
-                                          filteredVisits[index].patientName,
-                                      doctorName:
-                                          filteredVisits[index].doctorName,
-                                      diseaseName:
-                                          filteredVisits[index].diseaseName,
-                                      dateIn: filteredVisits[index].dateIn,
-                                      dateOut: filteredVisits[index].dateOut,
-                                      totalPrice:
-                                          filteredVisits[index].totalPrice,
-                                      status: filteredVisits[index].status,
-                                      nurseName:
-                                          filteredVisits[index].nurseName,
-                                    );
-                                    _showConfirmEdit(editedVisit);
-                                  } else {
-                                    editingVisitId =
-                                        filteredVisits[index].visitId;
-                                  }
-                                });
-                              },
-                              splashRadius: 20,
-                              hoverColor: Colors.blue[50],
-                            ),
+                            // IconButton(
+                            //   icon: Icon(
+                            //     editingVisitId == filteredVisits[index].visitId
+                            //         ? Icons.check
+                            //         : Icons.edit,
+                            //     color: editingVisitId ==
+                            //             filteredVisits[index].visitId
+                            //         ? Colors.green
+                            //         : Colors.blue,
+                            //     size: 20,
+                            //   ),
+                            //   onPressed: () {
+                            //     setState(() {
+                            //       if (editingVisitId ==
+                            //           filteredVisits[index].visitId) {
+                            //         final editedVisit = Visit(
+                            //           visitId: filteredVisits[index].visitId,
+                            //           patientName:
+                            //               filteredVisits[index].patientName,
+                            //           doctorName:
+                            //               filteredVisits[index].doctorName,
+                            //           diseaseName:
+                            //               filteredVisits[index].diseaseName,
+                            //           dateIn: filteredVisits[index].dateIn,
+                            //           dateOut: filteredVisits[index].dateOut,
+                            //           totalPrice:
+                            //               filteredVisits[index].totalPrice,
+                            //           status: filteredVisits[index].status,
+                            //           nurseName:
+                            //               filteredVisits[index].nurseName,
+                            //         );
+                            //         _showConfirmEdit(editedVisit);
+                            //       } else {
+                            //         editingVisitId =
+                            //             filteredVisits[index].visitId;
+                            //       }
+                            //     });
+                            //   },
+                            //   splashRadius: 20,
+                            //   hoverColor: Colors.blue[50],
+                            // ),
                             if (editingVisitId == filteredVisits[index].visitId)
                               IconButton(
                                 icon: const Icon(

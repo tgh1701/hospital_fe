@@ -25,7 +25,7 @@ class VisitController extends GetxController{
           final List<dynamic> result = jsonResponse['result'];
           rxListVisit.value =
               result.map((item) => Visit.fromJson(item)).toList();
-          AppLogger.debug(decodedBody);
+          // AppLogger.debug(decodedBody);
         } else {
           throw Exception('Invalid response format');
         }

@@ -5,6 +5,7 @@ import 'package:hospital_fe/controller/doctor.dart';
 import 'package:hospital_fe/controller/patient.dart';
 import 'package:hospital_fe/controller/visit.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
 
 class CreateVisitDialog extends StatefulWidget {
   const CreateVisitDialog({super.key});
@@ -69,7 +70,7 @@ class _CreateVisitDialogState extends State<CreateVisitDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               const Text(
-                'Tạo lượt thăm khám',
+                'Thêm lượt thăm khám',
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -77,9 +78,9 @@ class _CreateVisitDialogState extends State<CreateVisitDialog> {
                 ),
               ),
               const SizedBox(height: 15),
-              _buildTextField(visitController.visitIdController, 'Mã lần khám'),
-              _buildTextField(visitController.totalPriceController, 'Tổng chi phí', keyboardType: TextInputType.number),
-              _buildTextField(visitController.statusController, 'Trạng thái'),
+              _buildInputField(visitController.visitIdController, 'Mã lần khám'),
+              _buildInputField(visitController.totalPriceController, 'Tổng chi phí', keyboardType: TextInputType.number, inputFormatters: [FilteringTextInputFormatter.digitsOnly]),
+              _buildInputField(visitController.statusController, 'Trạng thái'),
               Obx(() {
                 return DropdownButtonFormField<String>(
                   decoration: const InputDecoration(labelText: 'Chọn bệnh nhân'),
@@ -169,26 +170,11 @@ class _CreateVisitDialogState extends State<CreateVisitDialog> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 30, vertical: 15),
                     ),
-                    child: const Text('Tạo',
+                    child: const Text('Thêm',
                         style: TextStyle(fontSize: 16, color: Colors.white)),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        if (selectedDateInController.text.isNotEmpty &&
-                            selectedDateOutController.text.isNotEmpty) {
-                          visitController.postVisit(
-                            selectedPatient!,
-                            selectedDoctor!,
-                            selectedDisease!,
-                            selectedDateInController.text,
-                            selectedDateOutController.text,
-                          );
-                          Navigator.of(context).pop();
-                        } else {
-                          Get.snackbar("Lỗi", "Vui lòng chọn ngày vào và ngày ra",
-                              snackPosition: SnackPosition.BOTTOM,
-                              backgroundColor: Colors.red,
-                              colorText: Colors.white);
-                        }
+                        _showConfirmCreate();
                       }
                     },
                   ),
@@ -201,13 +187,47 @@ class _CreateVisitDialogState extends State<CreateVisitDialog> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label,
-      {TextInputType keyboardType = TextInputType.text}) {
+  void _showConfirmCreate() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Thêm lượt thăm khám'),
+          content: const Text('Bạn đã chắc chắn chưa?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Hủy'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await visitController.postVisit(
+                  selectedPatient!,
+                  selectedDoctor!,
+                  selectedDisease!,
+                  selectedDateInController.text,
+                  selectedDateOutController.text,
+                );
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+              child: const Text('Xác nhận'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildInputField(TextEditingController controller, String label,
+      {TextInputType keyboardType = TextInputType.text,
+        List<TextInputFormatter>? inputFormatters}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5.0),
       child: TextFormField(
         controller: controller,
         keyboardType: keyboardType,
+        inputFormatters: inputFormatters,
         decoration: InputDecoration(
           labelText: label,
           border: const UnderlineInputBorder(),

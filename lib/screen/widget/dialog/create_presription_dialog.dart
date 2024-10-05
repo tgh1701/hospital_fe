@@ -1,20 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter/services.dart'; // Để sử dụng FilteringTextInputFormatter
-import 'package:intl/intl.dart'; // Để định dạng ngày tháng
-import 'package:hospital_fe/controller/nurse.dart';
+import 'package:hospital_fe/controller/medicine.dart';
+import 'package:hospital_fe/controller/prescription.dart';
+import 'package:hospital_fe/controller/visit.dart';
+import 'package:flutter/services.dart';
 
-class CreateNurseDialog extends StatefulWidget {
-  const CreateNurseDialog({super.key});
+class CreatePrescriptionDialog extends StatefulWidget {
+  const CreatePrescriptionDialog({super.key});
 
   @override
-  State<CreateNurseDialog> createState() => _CreateNurseDialogState();
+  State<CreatePrescriptionDialog> createState() =>
+      _CreatePrescriptionDialogState();
 }
 
-class _CreateNurseDialogState extends State<CreateNurseDialog> {
+class _CreatePrescriptionDialogState extends State<CreatePrescriptionDialog> {
   final _formKey = GlobalKey<FormState>();
 
-  final NurseController nurseController = Get.put(NurseController());
+  final PrescriptionController prescriptionController = Get.put(PrescriptionController());
+  final VisitController visitController = Get.put(VisitController());
+  final MedicineController medicineController = Get.put(MedicineController());
+
+  String? selectedVisit;
+  String? selectedMedicine;
+
+  @override
+  void initState() {
+    super.initState();
+    visitController.getVisit(); // Lấy danh sách lần khám
+    medicineController.getMedicine(); // Lấy danh sách thuốc
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +39,7 @@ class _CreateNurseDialogState extends State<CreateNurseDialog> {
     );
   }
 
-  Widget contentBox(context) {
+  Widget contentBox(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
         padding: const EdgeInsets.all(20),
@@ -33,7 +47,10 @@ class _CreateNurseDialogState extends State<CreateNurseDialog> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-                color: Colors.black12, offset: Offset(0, 10), blurRadius: 15),
+              color: Colors.black12,
+              offset: Offset(0, 10),
+              blurRadius: 15,
+            ),
           ],
         ),
         child: Form(
@@ -43,7 +60,7 @@ class _CreateNurseDialogState extends State<CreateNurseDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               const Text(
-                'Thêm y tá',
+                'Thêm Đơn Thuốc',
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -51,35 +68,67 @@ class _CreateNurseDialogState extends State<CreateNurseDialog> {
                 ),
               ),
               const SizedBox(height: 15),
-              _buildInputField(nurseController.nurseIdController, 'Mã Y Tá'),
               _buildInputField(
-                nurseController.identityCardController,
-                'Số CMND/CCCD',
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              ),
-              _buildInputField(nurseController.nurseNameController, 'Tên Y Tá'),
-              _buildDateInputField(nurseController.dateOfBirthController, 'Ngày Sinh'),
-              _buildInputField(nurseController.addressController, 'Địa Chỉ'),
-              _buildInputField(nurseController.seniorityController, 'Thâm niên (Số năm)',
+                  prescriptionController.prescriptionIdController, 'Mã Đơn Thuốc'),
+              Obx(() {
+                return DropdownButtonFormField<String>(
+                  decoration: const InputDecoration(labelText: 'Chọn lần khám'),
+                  value: selectedVisit,
+                  items: visitController.rxListVisit.map((visit) {
+                    return DropdownMenuItem<String>(
+                      value: visit.visitId,
+                      child: Text(visit.visitId ?? "N/A"),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedVisit = value;
+                    });
+                  },
+                  validator: (value) {
+                    if (value == null) {
+                      return 'Vui lòng chọn lần khám';
+                    }
+                    return null;
+                  },
+                );
+              }),
+              const SizedBox(height: 15),
+              _buildInputField(
+                  prescriptionController.prescriptionMedicineIdController,
+                  'Mã Chi Tiết Đơn Thuốc'),
+              Obx(() {
+                return DropdownButtonFormField<String>(
+                  decoration: const InputDecoration(labelText: 'Chọn Thuốc'),
+                  value: selectedMedicine,
+                  items: medicineController.rxListMedicine.map((medicine) {
+                    return DropdownMenuItem<String>(
+                      value: medicine.medicineId,
+                      child: Text(medicine.medicineName ?? "N/A"),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedMedicine = value;
+                    });
+                  },
+                  validator: (value) {
+                    if (value == null) {
+                      return 'Vui lòng chọn thuốc';
+                    }
+                    return null;
+                  },
+                );
+              }),
+              _buildInputField(prescriptionController.quantityController,
+                  'Số Lượng',
                   keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly]),
-              _buildInputField(nurseController.levelController, 'Trình Độ'),
-              _buildInputField(nurseController.phoneController, 'Điện Thoại',
-                  keyboardType: TextInputType.phone,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly]),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   TextButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 30, vertical: 15),
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.zero,
-                      ),
-                    ),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
@@ -92,9 +141,6 @@ class _CreateNurseDialogState extends State<CreateNurseDialog> {
                       backgroundColor: Colors.blue,
                       padding: const EdgeInsets.symmetric(
                           horizontal: 30, vertical: 15),
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.zero,
-                      ),
                     ),
                     child: const Text('Thêm',
                         style: TextStyle(fontSize: 16, color: Colors.white)),
@@ -118,7 +164,7 @@ class _CreateNurseDialogState extends State<CreateNurseDialog> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Thêm y tá'),
+          title: const Text('Thêm Đơn Thuốc'),
           content: const Text('Bạn đã chắc chắn chưa?'),
           actions: [
             TextButton(
@@ -127,7 +173,10 @@ class _CreateNurseDialogState extends State<CreateNurseDialog> {
             ),
             ElevatedButton(
               onPressed: () async {
-                await nurseController.postNurse();
+                await prescriptionController.postPrescription(
+                  selectedVisit!,
+                  selectedMedicine!,
+                );
                 Navigator.pop(context);
                 Navigator.pop(context);
               },
@@ -155,39 +204,6 @@ class _CreateNurseDialogState extends State<CreateNurseDialog> {
         validator: (value) {
           if (value == null || value.isEmpty) {
             return 'Vui lòng nhập $label';
-          }
-          return null;
-        },
-      ),
-    );
-  }
-
-  Widget _buildDateInputField(
-      TextEditingController controller, String label) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5.0),
-      child: TextFormField(
-        controller: controller,
-        readOnly: true,
-        decoration: InputDecoration(
-          labelText: label,
-          border: const UnderlineInputBorder(),
-        ),
-        onTap: () async {
-          DateTime? pickedDate = await showDatePicker(
-            context: context,
-            initialDate: DateTime.now(),
-            firstDate: DateTime(1900),
-            lastDate: DateTime(2100),
-          );
-          if (pickedDate != null) {
-            String formattedDate = DateFormat('yyyy-MM-dd').format(pickedDate);
-            controller.text = formattedDate;
-          }
-        },
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Vui lòng chọn $label';
           }
           return null;
         },
