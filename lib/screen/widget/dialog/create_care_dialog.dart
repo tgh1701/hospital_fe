@@ -74,11 +74,12 @@ class _CreateCareDialogState extends State<CreateCareDialog> {
                   decoration: const InputDecoration(labelText: 'Chọn lần khám'),
                   value: selectedVisit,
                   items: visitController.rxListVisit
-                      .where((e) => e.nurseName == null)
-                      .map((e) {
+                      .map((e) => e.visitId)
+                      .toSet() // Loại bỏ các giá trị trùng lặp
+                      .map((visitId) {
                     return DropdownMenuItem<String>(
-                      value: e.visitId,
-                      child: Text(e.visitId ?? "N/A"),
+                      value: visitId,
+                      child: Text(visitId ?? "N/A"),
                     );
                   }).toList(),
                   onChanged: (value) {

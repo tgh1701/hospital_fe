@@ -23,7 +23,7 @@ class StatisticController extends GetxController {
       final url =
           '$apiStatistic/doctor-salaries?startDate=$startDate&endDate=$endDate';
       final response = await HttpService.getRequest(url, timeout: 30);
-      AppLogger.debug(url);
+      // AppLogger.debug(url);
 
       if (response.statusCode == 200) {
         final decodedBody = utf8.decode(response.bodyBytes);
@@ -82,7 +82,7 @@ class StatisticController extends GetxController {
       final url =
           '$apiStatistic/diseases?startDate=$startDate&endDate=$endDate';
       final response = await HttpService.getRequest(url, timeout: 30);
-
+      // AppLogger.info(url);
       if (response.statusCode == 200) {
         final decodedBody = utf8.decode(response.bodyBytes);
         final jsonResponse = jsonDecode(decodedBody);
@@ -90,7 +90,6 @@ class StatisticController extends GetxController {
           final List<dynamic> result = jsonResponse['result'];
           rxDisease.value =
               result.map((item) => StatisticsDisease.fromJson(item)).toList();
-          // AppLogger.debug(decodedBody);
         } else {
           throw Exception('Invalid response format');
         }
@@ -111,7 +110,7 @@ class StatisticController extends GetxController {
       final url =
           '$apiStatistic/total-revenue?startDate=$startDate&endDate=$endDate';
       final response = await HttpService.getRequest(url, timeout: 30);
-
+    AppLogger.info(url);
       if (response.statusCode == 200) {
         final decodedBody = utf8.decode(response.bodyBytes);
         final jsonResponse = jsonDecode(decodedBody);

@@ -71,13 +71,23 @@ class _CreatePrescriptionDialogState extends State<CreatePrescriptionDialog> {
               _buildInputField(
                   prescriptionController.prescriptionIdController, 'Mã Đơn Thuốc'),
               Obx(() {
+                // Loại bỏ các giá trị trùng lặp trong danh sách visit
+                final uniqueVisits = visitController.rxListVisit.map((visit) => visit.visitId).toSet().toList();
+
+                // Đảm bảo selectedVisit luôn có trong danh sách items, nếu không thì đặt lại về null
+                if (!uniqueVisits.contains(selectedVisit)) {
+                  setState(() {
+                    selectedVisit = null;
+                  });
+                }
+
                 return DropdownButtonFormField<String>(
                   decoration: const InputDecoration(labelText: 'Chọn lần khám'),
                   value: selectedVisit,
-                  items: visitController.rxListVisit.map((visit) {
+                  items: uniqueVisits.map((visitId) {
                     return DropdownMenuItem<String>(
-                      value: visit.visitId,
-                      child: Text(visit.visitId ?? "N/A"),
+                      value: visitId,
+                      child: Text(visitId ?? "N/A"),
                     );
                   }).toList(),
                   onChanged: (value) {
